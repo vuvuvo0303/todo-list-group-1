@@ -141,6 +141,12 @@ const Home = () => {
         text
       ),
   });
+
+  const handleDelete = (key: number) => {
+    const updateTodoItems = todoItems.filter((item) => item.key !== key);
+    setTodoItems(updateTodoItems);
+    localStorage.setItem("todo-data", JSON.stringify(updateTodoItems));
+  }
   const columns: TableColumnsType<ToDoType> = [
     {
       title: "Title",
@@ -167,7 +173,11 @@ const Home = () => {
       dataIndex: "",
       key: "x",
       width: "10%",
-      render: () => <a>Delete</a>,
+      render: (_, record) => (
+        <Button type="link" onClick={() => handleDelete(record.key)}>
+          Delete
+        </Button>
+      ),
     },
   ];
   return (
