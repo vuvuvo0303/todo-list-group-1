@@ -17,12 +17,12 @@ import Highlighter from "react-highlight-words";
 import { formatDateToString } from "../utils/dateUtils";
 type FieldType = {
   title?: string;
-  status?: "done" | "in progress" | "to-do";
+  status?: string;
 };
 interface ToDoType {
   key: number;
   title: string;
-  status: "done" | "in progress" | "to-do";
+  status: string;
   createdDate: string;
 }
 type DataIndex = keyof ToDoType;
@@ -47,7 +47,7 @@ const Home = () => {
     const newItem: ToDoType = {
       key: todoItems[todoItems.length - 1] ? todoItems[todoItems.length - 1].key + 1 : 0,
       title: values.title as string,
-      status: values.status as "done" | "in progress" | "to-do",
+      status: values.status as string,
       createdDate: new Date().toLocaleString(),
     };
     setTodoItems([...todoItems, newItem]);
@@ -193,9 +193,9 @@ const Home = () => {
             <Select
               placeholder="Status"
               options={[
-                { value: "to-do", label: "To Do" },
-                { value: "in progress", label: "In progress" },
-                { value: "done", label: "Done" },
+                { value: "To Do", label: "To Do" },
+                { value: "In progress", label: "In progress" },
+                { value: "Done", label: "Done" },
               ]}
             />
           </Form.Item>
