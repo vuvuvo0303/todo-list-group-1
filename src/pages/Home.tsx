@@ -45,7 +45,7 @@ const Home = () => {
   }, []);
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
     const newItem: ToDoType = {
-      key: todoItems[todoItems.length - 1] ? todoItems[todoItems.length - 1].key : 0,
+      key: todoItems[todoItems.length - 1] ? todoItems[todoItems.length - 1].key + 1 : 0,
       title: values.title as string,
       status: values.status as "done" | "in progress" | "to-do",
       createdDate: new Date().toLocaleString(),
