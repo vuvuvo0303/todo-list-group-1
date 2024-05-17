@@ -58,6 +58,7 @@ const Home = () => {
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
+
   const searchInput = useRef<InputRef>(null);
 
   const handleSearch = (selectedKeys: string[], confirm: FilterDropdownProps["confirm"], dataIndex: DataIndex) => {
@@ -65,12 +66,12 @@ const Home = () => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
-
+  
   const handleReset = (clearFilters: () => void) => {
     clearFilters();
     setSearchText("");
   };
-
+  
   const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<ToDoType> => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
@@ -140,7 +141,8 @@ const Home = () => {
       ) : (
         text
       ),
-  });
+  }); // Configures column search properties
+  
 
   const handleDelete = (key: number) => {
     const updateTodoItems = todoItems.filter((item) => item.key !== key);
