@@ -58,7 +58,8 @@ const Home = () => {
     localStorage.setItem("todo-data", JSON.stringify([...todoItems, newItem]));
     setRenderKey(renderKey + 1);
     form.resetFields();
-    toast.success(`Add ${values.title} for new task sucessfully`);
+  
+    toast.success(`Add ${values.title} for new rask sucessfully`)
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
