@@ -5,6 +5,7 @@ import {
   FormProps,
   Input,
   InputRef,
+  Modal,
   Select,
   Space,
   Table,
@@ -19,7 +20,6 @@ import Highlighter from "react-highlight-words";
 import { formatDateToString } from "../utils/dateUtils";
 import { useForm } from "antd/es/form/Form";
 
-
 type FieldType = {
   title?: string;
   status?: string;
@@ -33,14 +33,17 @@ type ToDoType = {
 type DataIndex = keyof ToDoType;
 
 const Home = () => {
-
-
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   //(array of ToDoType objects) and the initialization value is [] (an empty array).
   const [todoItems, setTodoItems] = useState<ToDoType[]>([]);
   const [renderKey, setRenderKey] = useState(0);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedTodoItem, setSelectedTodoItem] = useState<ToDoType | null>(
+    null
+  );
   const [form] = useForm();
+
   useEffect(() => {
     //getItem returns a string if any data is stored with the key
     const dataStr = localStorage.getItem("todo-data");
@@ -57,7 +60,9 @@ const Home = () => {
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
     const newItem: ToDoType = {
       //check if array todoItems have any element, if it had, key + 1(index + 1), if not key = 0(first element)
-      key: todoItems[todoItems.length - 1] ? todoItems[todoItems.length - 1].key + 1 : 0,
+      key: todoItems[todoItems.length - 1]
+        ? todoItems[todoItems.length - 1].key + 1
+        : 0,
       title: values.title as string,
       status: values.status as string,
       //toISOString()) is always in the standard format and does not depend on the system's regional settings
@@ -68,16 +73,22 @@ const Home = () => {
     setRenderKey(renderKey + 1);
     form.resetFields();
 
-    toast.success(`Add ${values.title} for new rask sucessfully`)
+    toast.success(`Add ${values.title} for new rask sucessfully`);
   };
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
+  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+    errorInfo
+  ) => {
     console.log("Failed:", errorInfo);
   };
   //
   const searchInput = useRef<InputRef>(null);
 
-  const handleSearch = (selectedKeys: string[], confirm: FilterDropdownProps["confirm"], dataIndex: DataIndex) => {
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: FilterDropdownProps["confirm"],
+    dataIndex: DataIndex
+  ) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
@@ -86,6 +97,20 @@ const Home = () => {
   const handleReset = (clearFilters: () => void) => {
     clearFilters();
     setSearchText("");
+  };
+
+  const handleEdit = (todoItem: ToDoType) => {
+    setSelectedTodoItem(todoItem);
+    setEditModalVisible(true);
+  };
+
+  const handleUpdateTodo = (key: number, updatedData: ToDoType) => {
+    const updatedItems = todoItems.map((item) =>
+      item.key === key ? { ...item, ...updatedData } : item
+    );
+    setTodoItems(updatedItems);
+    localStorage.setItem("todo-data", JSON.stringify(updatedItems));
+    setEditModalVisible(false);
   };
 
   //handleDelete takes a key (a unique identifier for each ToDoItem) as a parameter.
@@ -97,30 +122,48 @@ const Home = () => {
     setTodoItems(updateTodoItems);
     localStorage.setItem("todo-data", JSON.stringify(updateTodoItems));
     toast.success("Delete successfully!");
-  }
+  };
 
-  const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<ToDoType> => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+  const getColumnSearchProps = (
+    dataIndex: DataIndex
+  ): TableColumnType<ToDoType> => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
-          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() =>
+            handleSearch(selectedKeys as string[], confirm, dataIndex)
+          }
           style={{ marginBottom: 8, display: "block" }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+            onClick={() =>
+              handleSearch(selectedKeys as string[], confirm, dataIndex)
+            }
             icon={<SearchOutlined />}
             size="small"
             style={{ width: 90 }}
           >
             Search
           </Button>
-          <Button onClick={() => clearFilters && handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
             Reset
           </Button>
           <Button
@@ -146,7 +189,9 @@ const Home = () => {
         </Space>
       </div>
     ),
-    filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />,
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+    ),
     onFilter: (value, record) =>
       record[dataIndex]
         .toString()
@@ -182,7 +227,9 @@ const Home = () => {
       dataIndex: "createdDate",
       key: "createdDate",
       width: "20%",
-      render: (text: string) => <span>{formatDateToString(new Date(text))}</span>,
+      render: (text: string) => (
+        <span>{formatDateToString(new Date(text))}</span>
+      ),
     },
     {
       title: "Status",
@@ -196,17 +243,26 @@ const Home = () => {
       dataIndex: "",
       key: "x",
       width: "10%",
-      render: (_, record) => (
-        <Button type="primary" danger onClick={() => handleDelete(record.key)}>
-          Delete
-        </Button>
+      render: (_: any, record: ToDoType) => (
+        <Space size="middle">
+          <Button onClick={() => handleEdit(record)}>Edit</Button>
+          <Button
+            type="primary"
+            danger
+            onClick={() => handleDelete(record.key)}
+          >
+            Delete
+          </Button>
+        </Space>
       ),
     },
   ];
   return (
     <div className="">
       <div className="bg-gradient-to-r from-cyan-500 to-blue-500 py-5 px-20">
-        <h1 className="text-center text-3xl mb-5 text-white font-bold">TO DO LIST</h1>
+        <h1 className="text-center text-3xl mb-5 text-white font-bold">
+          TO DO LIST
+        </h1>
         <Form
           form={form}
           name="basic"
@@ -223,7 +279,11 @@ const Home = () => {
           >
             <Input placeholder="Title" />
           </Form.Item>
-          <Form.Item name="status" rules={[{ required: true, message: "Please input!" }]} className="col-span-2">
+          <Form.Item
+            name="status"
+            rules={[{ required: true, message: "Please input!" }]}
+            className="col-span-2"
+          >
             <Select
               placeholder="Status"
               options={[
@@ -243,6 +303,45 @@ const Home = () => {
       <div className="p-5">
         <Table columns={columns} dataSource={todoItems} />
       </div>
+      <Modal
+        title="Edit Task"
+        visible={editModalVisible}
+        onCancel={() => setEditModalVisible(false)}
+        footer={null}
+      >
+        {/* Biểu mẫu chỉnh sửa */}
+        <Form
+          form={form}
+          onFinish={(values) => {
+            handleUpdateTodo(selectedTodoItem!.key, values as ToDoType);
+            setEditModalVisible(false);
+          }}
+          initialValues={
+            selectedTodoItem
+              ? {
+                  title: selectedTodoItem.title,
+                  status: selectedTodoItem.status,
+                }
+              : undefined
+          }
+        >
+          <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="status" label="Status" rules={[{ required: true }]}>
+            <Select>
+              <Select.Option value="To Do">To Do</Select.Option>
+              <Select.Option value="In progress">In progress</Select.Option>
+              <Select.Option value="Done">Done</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Save
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
       <ToastContainer />;
     </div>
   );
