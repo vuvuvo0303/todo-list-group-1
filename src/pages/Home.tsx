@@ -15,6 +15,9 @@ import { FilterDropdownProps } from "antd/es/table/interface";
 import { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { formatDateToString } from "../utils/dateUtils";
+import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+
 type FieldType = {
   title?: string;
   status?: string;
@@ -28,27 +31,35 @@ interface ToDoType {
 type DataIndex = keyof ToDoType;
 
 const Home = () => {
+
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
+  //(array of ToDoType objects) and the initialization value is [] (an empty array).
   const [todoItems, setTodoItems] = useState<ToDoType[]>([]);
   const [renderKey, setRenderKey] = useState(0);
-  useEffect(() => {
-    const dataStr = localStorage.getItem("todo-data");
-    let localData;
 
+  //load data from localStorage when component render 1st time
+  useEffect(() => {
+    //getItem returns a string if any data is stored with the key
+    const dataStr = localStorage.getItem("todo-data");
+    let localData = [];
     if (dataStr != null) {
+      //This data will be converted from JSON strings into JavaScript objects using JSON.parse
       localData = JSON.parse(dataStr);
     } else {
       localData = [];
     }
     setTodoItems(localData);
   }, []);
+
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
     const newItem: ToDoType = {
+      //check if array todoItems have any element, if it had, key + 1(index + 1), if not key = 0(first element)
       key: todoItems[todoItems.length - 1] ? todoItems[todoItems.length - 1].key + 1 : 0,
       title: values.title as string,
       status: values.status as string,
-      createdDate: new Date().toLocaleString(),
+      //toISOString()) is always in the standard format and does not depend on the system's regional settings
+      createdDate: new Date().toISOString(),
     };
     setTodoItems([...todoItems, newItem]);
     localStorage.setItem("todo-data", JSON.stringify([...todoItems, newItem]));
@@ -58,6 +69,7 @@ const Home = () => {
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
+  //
   const searchInput = useRef<InputRef>(null);
 
   const handleSearch = (selectedKeys: string[], confirm: FilterDropdownProps["confirm"], dataIndex: DataIndex) => {
@@ -70,6 +82,17 @@ const Home = () => {
     clearFilters();
     setSearchText("");
   };
+
+  //handleDelete takes a key (a unique identifier for each ToDoItem) as a parameter.
+  //This function filters todoItems to remove the item with the corresponding key.
+  //Update the state todoItems with the new array.
+  //Update localStorage with the new array.
+  const handleDelete = (key: number) => {
+    const updateTodoItems = todoItems.filter((item) => item.key !== key);
+    setTodoItems(updateTodoItems);
+    localStorage.setItem("todo-data", JSON.stringify(updateTodoItems));
+    toast.success("Delete successfully!");
+  }
 
   const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<ToDoType> => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
@@ -142,11 +165,7 @@ const Home = () => {
       ),
   });
 
-  const handleDelete = (key: number) => {
-    const updateTodoItems = todoItems.filter((item) => item.key !== key);
-    setTodoItems(updateTodoItems);
-    localStorage.setItem("todo-data", JSON.stringify(updateTodoItems));
-  }
+
   const columns: TableColumnsType<ToDoType> = [
     {
       title: "Title",
