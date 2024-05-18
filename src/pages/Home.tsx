@@ -11,23 +11,22 @@ import {
   TableColumnType,
   TableColumnsType,
 } from "antd";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { FilterDropdownProps } from "antd/es/table/interface";
 import { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { formatDateToString } from "../utils/dateUtils";
-import 'react-toastify/dist/ReactToastify.css';
-import { toast } from "react-toastify";
-
 type FieldType = {
   title?: string;
   status?: string;
 };
-interface ToDoType {
+type ToDoType = {
   key: number;
   title: string;
   status: string;
   createdDate: string;
-}
+};
 type DataIndex = keyof ToDoType;
 
 const Home = () => {
@@ -38,7 +37,6 @@ const Home = () => {
   const [todoItems, setTodoItems] = useState<ToDoType[]>([]);
   const [renderKey, setRenderKey] = useState(0);
 
-  //load data from localStorage when component render 1st time
   useEffect(() => {
     //getItem returns a string if any data is stored with the key
     const dataStr = localStorage.getItem("todo-data");
@@ -64,6 +62,9 @@ const Home = () => {
     setTodoItems([...todoItems, newItem]);
     localStorage.setItem("todo-data", JSON.stringify([...todoItems, newItem]));
     setRenderKey(renderKey + 1);
+    form.resetFields();
+  
+    toast.success(`Add ${values.title} for new rask sucessfully`)
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
@@ -165,7 +166,6 @@ const Home = () => {
       ),
   });
 
-
   const columns: TableColumnsType<ToDoType> = [
     {
       title: "Title",
@@ -193,7 +193,7 @@ const Home = () => {
       key: "x",
       width: "10%",
       render: (_, record) => (
-        <Button type="link" onClick={() => handleDelete(record.key)}>
+        <Button type="primary" danger onClick={() => handleDelete(record.key)}>
           Delete
         </Button>
       ),
@@ -204,6 +204,7 @@ const Home = () => {
       <div className="bg-gradient-to-r from-cyan-500 to-blue-500 py-5 px-20">
         <h1 className="text-center text-3xl mb-5 text-white font-bold">TO DO LIST</h1>
         <Form
+          form={form}
           name="basic"
           initialValues={{ remember: true }}
           onFinish={onFinish}
@@ -238,6 +239,7 @@ const Home = () => {
       <div className="p-5">
         <Table columns={columns} dataSource={todoItems} />
       </div>
+      <ToastContainer />;
     </div>
   );
 };
