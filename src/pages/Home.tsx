@@ -17,6 +17,9 @@ import { FilterDropdownProps } from "antd/es/table/interface";
 import { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { formatDateToString } from "../utils/dateUtils";
+import { useForm } from "antd/es/form/Form";
+
+
 type FieldType = {
   title?: string;
   status?: string;
@@ -31,12 +34,13 @@ type DataIndex = keyof ToDoType;
 
 const Home = () => {
 
+
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   //(array of ToDoType objects) and the initialization value is [] (an empty array).
   const [todoItems, setTodoItems] = useState<ToDoType[]>([]);
   const [renderKey, setRenderKey] = useState(0);
-
+  const [form] = useForm();
   useEffect(() => {
     //getItem returns a string if any data is stored with the key
     const dataStr = localStorage.getItem("todo-data");
@@ -63,7 +67,7 @@ const Home = () => {
     localStorage.setItem("todo-data", JSON.stringify([...todoItems, newItem]));
     setRenderKey(renderKey + 1);
     form.resetFields();
-  
+
     toast.success(`Add ${values.title} for new rask sucessfully`)
   };
 
