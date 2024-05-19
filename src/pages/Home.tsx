@@ -130,11 +130,11 @@ const Home = () => {
             onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
             icon={<SearchOutlined />}
             size="small"
-            style={{ width: 90 }}
+            style={{ width: 92 }}
           >
             Search
           </Button>
-          <Button onClick={() => clearFilters && handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+          <Button onClick={() => clearFilters && handleReset(clearFilters)} size="small" style={{ width: 92 }}>
             Reset
           </Button>
           <Button
