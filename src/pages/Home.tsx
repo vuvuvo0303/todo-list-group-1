@@ -261,7 +261,7 @@ const Home = () => {
             onConfirm={() => handleDelete(record.key)} // Đảm bảo dùng prop onConfirm để xử lý xóa
           >
             <Button type="primary" danger>
-              Xóa
+              Delete
             </Button>
           </Popconfirm>
         </Space>
